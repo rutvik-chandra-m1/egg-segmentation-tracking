@@ -2,7 +2,9 @@
 
 Segments eggs with SAM, builds a classical algorithm to match it, evaluates that algorithm against SAM, and tracks two eggs through a video.
 
-**Full write-up: [report/report.pdf](report/report.pdf)**, including the experiment log, evaluation and the link to the tracking video.
+**Full write-up: [report/report.pdf](report/report.pdf)**, including the experiment log and evaluation.
+
+**Tracking video: [watch on Google Drive](https://drive.google.com/file/d/1Ne4JJu_ycORmcKbMRhbO92BvLx1tToE5/view?usp=sharing)**
 
 | Task | Result |
 |---|---|
