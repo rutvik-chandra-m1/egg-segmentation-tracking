@@ -1,0 +1,23 @@
+id,scene,iou,boundary_f1,precision,recall,gt_eggs,pred_eggs,failure
+135,steel_pot,0.0,0.0,0.0,0.0,1,1,wrong object
+145,steel_pot,0.416,0.22,1.0,0.416,1,1,egg under-covered
+153,steel_pot,0.658,0.227,0.999,0.658,1,1,egg under-covered
+124,steel_pot,0.707,0.234,0.759,0.912,1,1,leak onto background
+28,concrete,0.708,0.538,0.992,0.712,1,1,egg under-covered
+113,steel_pot,0.941,0.786,0.987,0.954,2,2,good
+147,steel_pot,0.972,0.94,0.996,0.977,2,2,good
+114,steel_pot,0.976,0.92,0.995,0.981,2,2,good
+128,steel_pot,0.978,0.926,0.99,0.989,2,2,good
+45,concrete,0.981,0.945,0.988,0.992,1,1,good
+154,green_carpet,0.983,0.898,0.983,1.0,1,1,good
+146,concrete,0.984,0.944,0.986,0.997,1,1,good
+33,concrete,0.985,0.995,0.987,0.998,1,1,good
+159,steel_pot,0.987,0.956,0.995,0.992,1,1,good
+18,keyboard,0.987,0.971,0.99,0.997,1,1,good
+29,concrete,0.987,0.946,0.988,0.999,1,1,good
+164,green_carpet,0.989,0.984,0.989,1.0,1,1,good
+162,green_carpet,0.989,0.975,0.99,0.999,1,1,good
+129,steel_pot,0.989,0.99,0.996,0.993,2,2,good
+43,keyboard,0.992,1.0,0.994,0.998,1,1,good
+19,keyboard,0.993,0.978,0.994,0.999,1,1,good
+17,keyboard,0.994,1.0,0.996,0.998,1,1,good

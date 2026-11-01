@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+data/
+weights/
+outputs/sam_candidates/
+outputs/sam_overlays/
+outputs/tracked.mp4
+outputs/tracks.json
+CV_Intern_Task.pdf

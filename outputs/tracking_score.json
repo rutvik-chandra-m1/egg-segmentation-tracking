@@ -1,0 +1,13 @@
+{
+ "mapping": {
+  "A": 1,
+  "B": 2
+ },
+ "correct": 60,
+ "wrong_id": 0,
+ "no_track": 4,
+ "track_ids": [
+  1,
+  2
+ ]
+}

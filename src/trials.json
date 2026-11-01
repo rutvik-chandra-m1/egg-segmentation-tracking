@@ -1,0 +1,411 @@
+[
+ {
+  "id": "T01",
+  "name": "Otsu on grayscale",
+  "parent": null,
+  "why": "Baseline. Eggs are bright, so the simplest global threshold shows how far brightness alone goes.",
+  "changes": {
+   "channel": "gray",
+   "proposals": [
+    "otsu"
+   ],
+   "selection": "all"
+  }
+ },
+ {
+  "id": "T02",
+  "name": "Keep largest component",
+  "parent": "T01",
+  "why": "T01 labels every bright pixel; most images hold one main object.",
+  "changes": {
+   "selection": "largest"
+  }
+ },
+ {
+  "id": "T03",
+  "name": "Median blur and open/close",
+  "parent": "T02",
+  "why": "Speckle and texture fragment the mask and join it to the background.",
+  "changes": {
+   "denoise": "median",
+   "open": 7,
+   "close": 7
+  }
+ },
+ {
+  "id": "T04",
+  "name": "LAB lightness channel",
+  "parent": "T03",
+  "why": "Perceptual lightness may separate eggs better than gray.",
+  "changes": {
+   "channel": "l"
+  }
+ },
+ {
+  "id": "T05",
+  "name": "Whiteness channel (L minus chroma)",
+  "parent": "T03",
+  "why": "Hands, pink bowls and fabrics are bright but coloured; shells are not.",
+  "changes": {
+   "channel": "whiteness"
+  }
+ },
+ {
+  "id": "T06",
+  "name": "Adaptive threshold",
+  "parent": "T05",
+  "why": "Uneven lighting defeats one global level; a local threshold might not.",
+  "changes": {
+   "proposals": [
+    "adaptive"
+   ]
+  }
+ },
+ {
+  "id": "T07",
+  "name": "Select by ellipse fit, not size",
+  "parent": "T05",
+  "why": "The largest bright region is often the background; eggs are ellipses and backgrounds are not.",
+  "changes": {
+   "selection": "egg"
+  }
+ },
+ {
+  "id": "T08",
+  "name": "Threshold sweep proposals",
+  "parent": "T07",
+  "why": "No single level suits every image, so try many and let the ellipse test choose.",
+  "changes": {
+   "proposals": [
+    "sweep"
+   ],
+   "sweep_levels": 12
+  }
+ },
+ {
+  "id": "T09",
+  "name": "Add dark-side sweep",
+  "parent": "T08",
+  "why": "Against a white towel or bag the egg can be the darker region.",
+  "changes": {
+   "proposals": [
+    "sweep",
+    "sweep_dark"
+   ]
+  }
+ },
+ {
+  "id": "T10",
+  "name": "Relax ellipse test to 0.75",
+  "parent": "T08",
+  "why": "Fingers and shadows clip the outline, so 0.85 may reject true eggs. Many images currently return nothing.",
+  "changes": {
+   "min_ellipse_iou": 0.75
+  }
+ },
+ {
+  "id": "T11",
+  "name": "Smoothness channel",
+  "parent": "T10",
+  "why": "Worst images are white eggs on white textured cloth, which brightness can't separate but texture can.",
+  "changes": {
+   "channel": "smooth"
+  }
+ },
+ {
+  "id": "T12",
+  "name": "Whiteness + smoothness proposals",
+  "parent": "T10",
+  "why": "The channels fail on different images, so pool their proposals and let the selector pick.",
+  "changes": {
+   "channel": [
+    "whiteness",
+    "smooth"
+   ]
+  }
+ },
+ {
+  "id": "T13",
+  "name": "Add pale and gray channels",
+  "parent": "T12",
+  "why": "More proposal sources for eggs that are neither bright nor on texture.",
+  "changes": {
+   "channel": [
+    "whiteness",
+    "smooth",
+    "pale",
+    "gray"
+   ]
+  }
+ },
+ {
+  "id": "T14",
+  "name": "Felzenszwalb region proposals",
+  "parent": "T13",
+  "why": "Graph-based regions give closed object shapes where no threshold isolates the egg.",
+  "changes": {
+   "proposals": [
+    "sweep",
+    "felz"
+   ]
+  }
+ },
+ {
+  "id": "T15",
+  "name": "Stop filling holes, cap area at 0.45",
+  "parent": "T12",
+  "why": "Visual review of T13: background sheets with an egg-shaped hole, once filled, pass the ellipse test.",
+  "changes": {
+   "fill_holes": false,
+   "max_area": 0.45
+  }
+ },
+ {
+  "id": "T16",
+  "name": "Edge-support selection on arcs",
+  "parent": null,
+  "why": "Regions split eggs along shading lines, yet the outline is visible nearly everywhere. Fit ellipses to Canny arcs, rank by how much perimeter sits on a normal gradient.",
+  "changes": {
+   "selection": "edge",
+   "denoise": "median",
+   "proposals": [],
+   "max_area": 0.45,
+   "min_area": 0.01
+  }
+ },
+ {
+  "id": "T17",
+  "name": "Penalise edges inside the ellipse",
+  "parent": "T16",
+  "why": "Ellipses fitted across textured background have support but a busy interior; a shell has a clean one.",
+  "changes": {
+   "interior_weight": 4.0
+  }
+ },
+ {
+  "id": "T18",
+  "name": "Prefer larger ellipses",
+  "parent": "T17",
+  "why": "Small fits on a shading line can out-score the whole egg.",
+  "changes": {
+   "size_weight": 1.0
+  }
+ },
+ {
+  "id": "T19",
+  "name": "GrabCut boundary refinement",
+  "parent": "T18",
+  "why": "Eggs are not perfect ellipses and fingers occlude them; snap to real edges.",
+  "changes": {
+   "refine": "grabcut"
+  }
+ },
+ {
+  "id": "T20",
+  "name": "Penalise colour inside the ellipse",
+  "parent": "T17",
+  "why": "Review of T19: tubs and bowls are ellipses too, and T18's size bonus chose them. Shells are nearly colourless. Branches from T17, dropping the size bonus.",
+  "changes": {
+   "saturation_weight": 1.5
+  }
+ },
+ {
+  "id": "T21",
+  "name": "Lower support threshold to 1.5",
+  "parent": "T20",
+  "why": "White eggs on white surfaces have faint outlines that fall below 2.5 levels per pixel.",
+  "changes": {
+   "edge_thresh": 1.5
+  }
+ },
+ {
+  "id": "T22",
+  "name": "Lower Canny to (10, 30)",
+  "parent": "T20",
+  "why": "Faint outlines never become arcs, so no ellipse is even proposed.",
+  "changes": {
+   "canny": [
+    10,
+    30
+   ]
+  }
+ },
+ {
+  "id": "T23",
+  "name": "Both lower thresholds",
+  "parent": "T21",
+  "why": "Combine T21 and T22.",
+  "changes": {
+   "canny": [
+    10,
+    30
+   ]
+  }
+ },
+ {
+  "id": "T24",
+  "name": "80 arcs instead of 40",
+  "parent": "T23",
+  "why": "Textured images produce many long arcs that crowd out the egg's.",
+  "changes": {
+   "max_arcs": 80
+  }
+ },
+ {
+  "id": "T25",
+  "name": "Region proposals as extra ellipse seeds",
+  "parent": "T23",
+  "why": "T12's sweep found eggs on some images where arcs fail, so offer those as candidates too.",
+  "changes": {
+   "region_seeds": true,
+   "proposals": [
+    "sweep"
+   ],
+   "channel": [
+    "whiteness",
+    "smooth"
+   ],
+   "fill_holes": false
+  }
+ },
+ {
+  "id": "T26",
+  "name": "Back to threshold 2.5 with 80 arcs",
+  "parent": "T22",
+  "why": "T21 and T23 showed the 1.5 threshold does not help once Canny is lower, so drop it.",
+  "changes": {
+   "max_arcs": 80
+  }
+ },
+ {
+  "id": "T27",
+  "name": "Keep ratio 0.75 to 0.9",
+  "parent": "T26",
+  "why": "Count accuracy is the weakest metric: extra ellipses score within 75% of the true egg.",
+  "changes": {
+   "keep_ratio": 0.9
+  }
+ },
+ {
+  "id": "T28",
+  "name": "Raise minimum score to 0.5",
+  "parent": "T27",
+  "why": "Absolute floor on weak single detections.",
+  "changes": {
+   "min_score": 0.5
+  }
+ },
+ {
+  "id": "T29",
+  "name": "Polish ellipses onto edges",
+  "parent": "T27",
+  "why": "Boundary F1 is 0.57 with correct selections: arc fits are rough.",
+  "changes": {
+   "polish": true
+  }
+ },
+ {
+  "id": "T30",
+  "name": "GrabCut in a narrow band",
+  "parent": "T29",
+  "why": "T19 GrabCut raised boundary F1, and selection is now right often enough to refine. Narrow band limits leaks.",
+  "changes": {
+   "refine": "grabcut",
+   "grabcut_band": 0.04
+  }
+ },
+ {
+  "id": "T31",
+  "name": "GrabCut in a wide band",
+  "parent": "T29",
+  "why": "Compare with T30: does a wider band recover occlusions or just leak?",
+  "changes": {
+   "refine": "grabcut",
+   "grabcut_band": 0.1
+  }
+ },
+ {
+  "id": "T32",
+  "name": "T24 thresholds, keep 0.9, wide GrabCut",
+  "parent": "T24",
+  "why": "T24 had the best IoU and T31 the best count and boundary. Combine them, without polish, which added cost for no gain.",
+  "changes": {
+   "keep_ratio": 0.9,
+   "refine": "grabcut",
+   "grabcut_band": 0.1
+  }
+ },
+ {
+  "id": "T33",
+  "name": "Keep ratio 0.8",
+  "parent": "T32",
+  "why": "0.9 costs recall on multi-egg images. Look for a middle ground.",
+  "changes": {
+   "keep_ratio": 0.8
+  }
+ },
+ {
+  "id": "T34",
+  "name": "Stronger interior penalty (4 to 8)",
+  "parent": "T32",
+  "why": "The interior penalty gave the largest single gain in T17, and foil and tubs still win sometimes.",
+  "changes": {
+   "interior_weight": 8.0
+  }
+ },
+ {
+  "id": "T35",
+  "name": "Stronger colour penalty (1.5 to 2.5)",
+  "parent": "T32",
+  "why": "Same reasoning for colourful containers.",
+  "changes": {
+   "saturation_weight": 2.5
+  }
+ },
+ {
+  "id": "T36",
+  "name": "Lower bar for same-size eggs",
+  "parent": "T32",
+  "why": "Review of T32: 140 and 144 find 1 of 3 eggs. Eggs in a photo share a size and junk does not.",
+  "changes": {
+   "same_size_ratio": 0.7
+  }
+ },
+ {
+  "id": "T37",
+  "name": "Penalise uneven brightness inside",
+  "parent": "T36",
+  "why": "Review of T32: bag-flap ellipses span a dark slit, an egg interior is even.",
+  "changes": {
+   "variance_weight": 1.0
+  }
+ },
+ {
+  "id": "T38",
+  "name": "Same-size ratio 0.6",
+  "parent": "T37",
+  "why": "Check the sensitivity of the T36 value.",
+  "changes": {
+   "same_size_ratio": 0.6
+  }
+ },
+ {
+  "id": "T39",
+  "name": "Gentler brightness penalty, lower floor",
+  "parent": "T32",
+  "why": "T37 failed because the penalty pushed true eggs below the fixed 0.35 floor, a flaw in the test. Retest fairly.",
+  "changes": {
+   "variance_weight": 0.4,
+   "min_score": 0.25
+  }
+ },
+ {
+  "id": "T40",
+  "name": "Same-size ratio 0.8",
+  "parent": "T32",
+  "why": "T36 at 0.7 traded too much precision. Try a milder bar.",
+  "changes": {
+   "same_size_ratio": 0.8
+  }
+ }
+]
