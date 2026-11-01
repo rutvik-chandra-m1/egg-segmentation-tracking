@@ -4,7 +4,7 @@ Segments eggs with SAM, builds a classical algorithm to match it, evaluates that
 
 **Full write-up: [report/report.pdf](report/report.pdf)**, including the experiment log and evaluation.
 
-**Tracking video: [watch on Google Drive](https://drive.google.com/file/d/1Ne4JJu_ycORmcKbMRhbO92BvLx1tToE5/view?usp=sharing)**
+**Tracking video: [watch on Google Drive](https://drive.google.com/file/d/1LRTRYRGC2bNLa6nA6khPVNs9gOWE8ihJ/view?usp=sharing)**
 
 | Task | Result |
 |---|---|
